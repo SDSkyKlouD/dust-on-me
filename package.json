@@ -1,0 +1,21 @@
+{
+  "name": "dust-on-me",
+  "version": "0.0.0",
+  "description": "Air quality(fine dust) information bot for Twitter",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.sdsk.one/SDSkyKlouD/dust.on.me"
+  },
+  "keywords": [
+    "twitter-bot"
+  ],
+  "author": "SD SkyKlouD",
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "twit": "^2.2.11"
+  }
+}
