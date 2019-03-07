@@ -16,6 +16,7 @@
   "author": "SD SkyKlouD",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
+    "axios": "^0.18.0",
     "twit": "^2.2.11"
   }
 }
