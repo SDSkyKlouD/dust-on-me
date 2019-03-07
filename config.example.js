@@ -15,5 +15,5 @@ module.exports = {
     },
 
     // Airkorea UTF-8 URL encoded API Key (data.go.kr / openapi.airkorea.or.kr)
-    airkoreaApiKey: ""
+    airKoreaApiKey: ""
 };
