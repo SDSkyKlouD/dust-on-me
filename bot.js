@@ -17,8 +17,8 @@ const logDebug = text => console.debug("[D] " + text);
 const isUsableVar = obj => typeof(obj) !== "undefined" && obj !== null;
 const postPublicTextTweet = text => twitter.post("statuses/update", { status: text });
 const safeProcessExit = (exitCode = 0) => { twitMentionStream.stop(); process.exit(exitCode); }
+const normalizeMentionTweetText = (text) => text.replace(`@${config.screenName} `, "").split(" ");
 /* === */
-
 
 /**
  * Call AirKorea API and returns the JSON response
