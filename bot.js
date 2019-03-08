@@ -49,5 +49,6 @@ async function callAirKoreaAPI(endpoint, options) {
         }
     } catch(error) {
         console.error(error);
+        return undefined;
     }
 }
