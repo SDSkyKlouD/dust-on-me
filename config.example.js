@@ -15,5 +15,8 @@ module.exports = {
     },
 
     // Airkorea UTF-8 URL encoded API Key (data.go.kr / openapi.airkorea.or.kr)
-    airKoreaApiKey: ""
+    airKoreaApiKey: "",
+
+    // Screen name of the bot (without `@`)
+    screenName: ""
 };
