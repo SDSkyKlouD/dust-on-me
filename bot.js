@@ -13,12 +13,13 @@ const twitMentionStream  = twitter.stream("statuses/filter", { track: [ `@${conf
 /* Simple functions */
 const logInfo = text => console.log("[I] " + text);
 const logError = text => console.error("[E] " + text);
-const logDebug = text => console.debug("[D] " + text);
+const logDebug = text => { if(config.debuggingLog === true) console.debug("[D] " + text); }
 const isUsableVar = obj => typeof(obj) !== "undefined" && obj !== null;
 const postPublicTextTweet = text => twitter.post("statuses/update", { status: text });
-const safeProcessExit = (exitCode = 0) => { twitMentionStream.stop(); process.exit(exitCode); }
 const normalizeMentionTweetText = (text) => text.replace(`@${config.screenName} `, "").split(" ");
 /* === */
+
+safeProcessExit();
 
 /**
  * Call AirKorea API and returns the JSON response
@@ -82,4 +83,22 @@ async function callAirKoreaAPI(endpoint, options) {
 
         return undefined;
     }
+}
+
+/**
+ * Exit the process safely (clean-up, etc...)
+ * @param {number} exitCode - Exit code. Default value is `0` 
+ */
+function safeProcessExit(exitCode = 0) {
+    logInfo("Exiting the process safely");
+
+    logDebug("* Stopping Twitter mention stream");
+    twitMentionStream.stop();
+    logDebug(" └ Passed");
+
+    // More safe sequences here
+
+    logDebug("Calling process.exit(" + exitCode + ")");
+    logInfo("Bye!");
+    process.exit(exitCode);
 }

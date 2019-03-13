@@ -18,5 +18,8 @@ module.exports = {
     airKoreaApiKey: "",
 
     // Screen name of the bot (without `@`)
-    screenName: ""
+    screenName: "",
+
+    // Enable/disable debugging log (value must be `true` or `false`)
+    debuggingLog: false
 };
