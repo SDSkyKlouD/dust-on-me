@@ -1,21 +1,21 @@
 /* === Definitions === */
 /* Configurations */
-const config      = require("./config.js");
+const config                    = require("./config.js");
 
 /* Modules */
-const twitter     = new (require("twit"))(config.twitterConfigs);
-const airKoreaKey = String.raw`${config.airkoreaApiKey}`;
-const axios       = require("axios");
+const twitter                   = new (require("twit"))(config.twitterConfigs);
+const airKoreaKey               = String.raw`${config.airkoreaApiKey}`;
+const axios                     = require("axios");
 
 /* `twit` setup */
-const twitMentionStream  = twitter.stream("statuses/filter", { track: [ `@${config.screenName}` ]});
+const twitMentionStream         = twitter.stream("statuses/filter", { track: [ `@${config.screenName}` ]});
 
 /* Simple functions */
-const logInfo = text => console.log("[I] " + text);
-const logError = text => console.error("[E] " + text);
-const logDebug = text => { if(config.debuggingLog === true) console.debug("[D] " + text); }
-const isUsableVar = obj => typeof(obj) !== "undefined" && obj !== null;
-const postPublicTextTweet = text => twitter.post("statuses/update", { status: text });
+const logInfo                   = (text) => console.log("[I] " + text);
+const logError                  = (text) => console.error("[E] " + text);
+const logDebug                  = (text) => { if(config.debuggingLog === true) console.debug("[D] " + text); }
+const isUsableVar               = (obj)  => typeof(obj) !== "undefined" && obj !== null;
+const postPublicTextTweet       = (text) => twitter.post("statuses/update", { status: text });
 const normalizeMentionTweetText = (text) => text.replace(`@${config.screenName} `, "").split(" ");
 /* === */
 
