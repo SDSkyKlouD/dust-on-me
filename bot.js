@@ -47,5 +47,5 @@ cron.schedule("0 3 */1 * * *", async () => {        // Scheduled: Post hourly du
 
         logging.logInfo(text);
         postPublicTextTweet(text);
-    }}
+    }
 });
