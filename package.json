@@ -18,5 +18,8 @@
   "dependencies": {
     "axios": "^0.18.0",
     "twit": "^2.2.11"
+  },
+  "devDependencies": {
+    "eslint": "^5.15.3"
   }
 }
