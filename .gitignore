@@ -1,6 +1,9 @@
 # Config files
 config.js
 
+# Visual Studio Code - Node run extension temp file
+node_*.tmp
+
 # Logs
 logs
 *.log
