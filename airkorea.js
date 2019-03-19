@@ -48,15 +48,6 @@ const endpoints                 = {
 };
 /* === */
 
-callAirKoreaAPI(endpoints.lastHourRTPM25InfoBySido[0], endpoints.lastHourRTPM25InfoBySido[1]).then(function(response) {
-    console.log(response.list[0]);
-    Object.entries(response.list[0]).forEach((item) => {
-        if(common.sidoNamesKor[item[0]] != undefined) {
-            console.log(common.sidoNamesKor[item[0]][1] + " : " + item[1] + "㎍/㎥" + ((item[1] >= common.whoPM25DailyBaseline) ? " | WHO 초미세먼지 24시간 평균 권고기준 이상임" : ""));
-        }
-    });
-});
-
 /**
  * Call AirKorea API and returns the JSON response
  * 
@@ -120,3 +111,11 @@ async function callAirKoreaAPI(endpoint, options) {
         return undefined;
     }
 }
+/* === */
+
+/* === Module setup === */
+module.exports = {
+    endpoints: endpoints,
+    call: callAirKoreaAPI
+};
+/* === */
