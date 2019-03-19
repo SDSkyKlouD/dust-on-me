@@ -1,6 +1,7 @@
 /* === Definitions === */
 /* Configurations */
-const config                    = require("./config.js");
+let config;
+try { config = require("./config.js"); } catch(error) { throw "Config file is not found!"; }
 
 /* Modules */
 const twitter                   = new (require("twit"))(config.twitterConfigs);
@@ -15,6 +16,8 @@ const postReplyTextTweet        = (inReplyToStatusId, text) => twitter.post("sta
 const normalizeMentionTweetText = (text) => text.replace(`@${config.screenName} `, "").split(" ");
 /* === */
 
+/* === Mention Command stream === */
 twitMentionStream.on("tweet", function(tweet) {
     postReplyTextTweet(tweet.id, `@${tweet.user.screen_name} 죄송해요! 아직 멘션 기능이 완성되지 않았어요😥`);
 });
+/* === */
