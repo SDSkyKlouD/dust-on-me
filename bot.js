@@ -31,13 +31,19 @@ twitMentionStream.on("tweet", async (tweet) => {
 
     switch(splitted[0]) {
         case "테스트":
-            logging.logDebug("The command is to check the bot doing its work well");
+            logging.logInfo("The command is to check the bot doing its work well");
 
             if(caller === config.maintainerAccountId) {
                 logging.logDebug("Test caller is the bot maintainer; response to him/her");
 
                 let uptime = common.getUptime();
-                let tweetResponse = await replyToCallerTweet(`잘 들려요! 현재 ${uptime.days}일 ${uptime.hours}시 ${uptime.minutes}분 ${uptime.seconds}초동안 가동되고 있어요.`);
+                let tweetResponse;
+                try {
+                    tweetResponse = await replyToCallerTweet(`잘 들려요! 현재 ${uptime.days}일 ${uptime.hours}시 ${uptime.minutes}분 ${uptime.seconds}초동안 가동되고 있어요.`);
+                } catch(error) {
+                    logging.logDebug("Failed to post test tweet");
+                    console.error(error);
+                }
 
                 if(common.isUsableVar(tweetResponse)) {
                     setTimeout(async () => {
