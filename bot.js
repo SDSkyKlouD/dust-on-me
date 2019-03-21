@@ -16,12 +16,52 @@ const twitMentionStream         = twitter.stream("statuses/filter", { track: [ `
 /* Simple functions */
 const postPublicTextTweet       = (text) => twitter.post("statuses/update", { status: text });
 const postReplyTextTweet        = (inReplyToStatusId, text) => twitter.post("statuses/update", { status: text, in_reply_to_status_id: inReplyToStatusId });
+const destroyTweet              = (tweetId) => twitter.post("statuses/destroy/:id", { id: tweetId });
 const normalizeMentionTweetText = (text) => text.replace(`@${config.screenName} `, "").split(" ");
 /* === */
 
 /* === Mention Command stream === */
-twitMentionStream.on("tweet", function(tweet) {
-    postReplyTextTweet(tweet.id, `@${tweet.user.screen_name} 죄송해요! 아직 멘션 기능이 완성되지 않았어요😥`);
+twitMentionStream.on("tweet", async (tweet) => {
+    logging.logInfo("Got mention to this bot");
+
+    let caller = tweet.user.id;
+    let replyToCallerTweet = (text) => postReplyTextTweet(tweet.id, `@${tweet.user.screen_name} ${text}`);
+    let splitted = normalizeMentionTweetText(tweet.text);
+    logging.logDebug(`Text splitted to process command : ${splitted}`);
+
+    switch(splitted[0]) {
+        case "테스트":
+            logging.logDebug("The command is to check the bot doing its work well");
+
+            if(caller === config.maintainerAccountId) {
+                logging.logDebug("Test caller is the bot maintainer; response to him/her");
+
+                let uptime = common.getUptime();
+                let tweetResponse = await replyToCallerTweet(`잘 들려요! 현재 ${uptime.days}일 ${uptime.hours}시 ${uptime.minutes}분 ${uptime.seconds}초동안 가동되고 있어요.`);
+
+                if(common.isUsableVar(tweetResponse)) {
+                    setTimeout(async () => {
+                        try {
+                            await destroyTweet(tweetResponse.data.id_str);         // `tweetResponse.data.id` is wrong id
+                            logging.logDebug("Test tweet destroyed");
+                        } catch(error) {
+                            logging.logDebug("Failed to destroy test tweet");
+                            console.error(error);
+                        }
+                    }, 10000);
+                }
+            } else {
+                logging.logDebug("Test caller is NOT the bot maintainer; act like the command is not exist");
+
+                replyToCallerTweet("알 수 없는 명령어에요! 명령어를 다시 한 번 확인해주세요😅");
+            }
+            break;
+        default:
+            logging.logDebug("The command is not exist; pass to default behavior");
+
+            replyToCallerTweet("죄송해요! 아직 멘션 기능이 완성되지 않았어요😥");
+            break;
+    }
 });
 /* === */
 

@@ -21,5 +21,8 @@ module.exports = {
     screenName: "",
 
     // Enable/disable debugging log (value must be `true` or `false`)
-    debuggingLog: false
+    debuggingLog: false,
+
+    // Twitter account ID(numeric `long`) of the bot maintainer
+    maintainerAccountId: 0
 };

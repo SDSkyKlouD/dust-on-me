@@ -7,6 +7,19 @@ module.exports = {
             throw new TypeError("isUsableVar: passed object is null or undefined");
         }
     },
+    getUptime: () => {
+        let uptime = process.uptime();
+
+        return {
+            seconds:        Math.floor(uptime % 60),
+            fullSeconds:    Math.floor(uptime),
+            minutes:        Math.floor(uptime % (24 * 60 * 60) / 60),
+            fullMinutes:    Math.floor(uptime / 60),
+            hours:          Math.floor(uptime % 24 / (60 * 60)),
+            fullHours :     Math.floor(uptime / (60 * 60)),
+            days:           Math.floor(uptime / (60 * 60 * 24))
+        };
+    },
 
     /* PM10/PM2.5 baselines */
     whoPM10DailyBaseline:  50,     // WHO - PM10 daily(24h) baseline                : 50㎍/㎥
