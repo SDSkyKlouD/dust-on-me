@@ -48,7 +48,7 @@ twitMentionStream.on("tweet", async (tweet) => {
                 if(common.isUsableVar(tweetResponse)) {
                     setTimeout(async () => {
                         try {
-                            await destroyTweet(tweetResponse.data.id_str);         // `tweetResponse.data.id` is wrong id (not accurate)
+                            await destroyTweet(tweetResponse.data.id_str);         // `tweetResponse.data.id` is wrong data (not accurate)
                             logging.logDebug("Test tweet destroyed");
                         } catch(error) {
                             logging.logDebug("Failed to destroy test tweet");
@@ -73,7 +73,10 @@ twitMentionStream.on("tweet", async (tweet) => {
 });
 /* === */
 
+/* === Scheduled Jobs === */
 cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly dust info for each sido on Twitter every hour
+    logging.logInfo("Scheduled job: post hourly PM2.5/PM1.0 information for each sido on Twitter every hour half");
+
     let PM25data = await airkorea.call(airkorea.endpoints.lastHourRTPM25InfoBySido[0],
                                        airkorea.endpoints.lastHourRTPM25InfoBySido[1]);
     PM25data = PM25data.list[0];
@@ -83,6 +86,8 @@ cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly d
 
     if(common.isUsableVar(PM25data) && common.isUsableVar(PM10data)
         && PM25data.dataTime === PM10data.dataTime) {
+        logging.logDebug("Both data looks good and data time is match");
+
         let lastUpdatedDate = PM25data.dataTime.replace(/-/g, "");
         let text = `${lastUpdatedDate} 시도별 평균\n단위 ${common.PMDustUnit}\nPM2.5｜PM10\n`;
 
@@ -93,7 +98,20 @@ cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly d
             }
         });
 
-        logging.logInfo(text);
-        postPublicTextTweet(text);
+        logging.logDebug(`Will post this on Twitter: \n${text}`);
+
+        try {
+            let postedTweet = await postPublicTextTweet(text);
+            
+            if(common.isUsableVar(postedTweet)) {
+                logging.logInfo("Posted on Twitter; scheduled job done");
+            } else {
+                logging.logError("Something's wrong while posting on Twitter; no Tweet data returned");
+            }
+        } catch(error) {
+            logging.logError("Something's wrong while posting on Twitter");
+            console.log(error);
+        }
     }
 });
+/* === */
