@@ -22,15 +22,15 @@ const normalizeMentionTweetText = (text) => text.replace(`@${config.screenName} 
 
 /* === Mention Command stream === */
 twitMentionStream.on("tweet", async (tweet) => {
+    let caller = tweet.user.id;
+    if(caller === config.botAccountId) return;
+
     logging.logInfo("Got mention to this bot");
 
-    let caller = tweet.user.id;
-    let replyToCallerTweet = (text) => postReplyTextTweet(tweet.id, `@${tweet.user.screen_name} ${text}`);
-    let replyToMyTweet     = (tweetObj, text) => postReplyTextTweet(tweetObj.id, text);
+    let replyToCallerTweet = (text) => postReplyTextTweet(tweet.id_str, `@${tweet.user.screen_name} ${text}`);
+    let replyToMyTweet     = (tweetObj, text) => postReplyTextTweet(tweetObj.data.id_str, `@${tweet.user.screen_name} ${text}`);
     let splitted = normalizeMentionTweetText(tweet.text);
     logging.logDebug(`Text splitted to process command : ${splitted}`);
-
-    if(caller === config.botAccountId) return;
 
     switch(splitted[0].toLowerCase()) {
         case "명령어":
@@ -40,12 +40,11 @@ twitMentionStream.on("tweet", async (tweet) => {
         case "도움말": {
             logging.logInfo("The command is to give the user some help message");
 
-            let gitRevision = require("child_process").execSync("git rev-parse --short HEAD", { cwd: __dirname }).toString().trim();
             let helpMessage =     "\n인터렉티브 미세먼지 정보봇, 『더스트.온.미』에요!\n" +
                                   "현재 개발 단계라 일부 기능/명령어가 없거나 작동하지 않을 수 있어요.\n" +
                                   `명령어는 【@${config.screenName} [명령어]】 형태로 멘션하시면 돼요.\n\n` +
                                   "사용 API : 한국환경공단 대기오염정보 OpenAPI\n" +
-                                  ((common.isUsableVar(gitRevision)) ? `개발 리비전 : ${gitRevision}` : "");
+                                  ((common.isUsableVar(common.gitRevision)) ? `개발 리비전 : ${common.gitRevision}` : "");
             let commandsMessage = "명령어 목록\n\n" +
                                   ((caller === config.maintainerAccountId) ? "🔧 테스트 : 봇 관리자용 명령어\n" : "") +
                                   "💬 도움말 : 간단한 도움말과 명령어 목록을 보여드려요.\n";
@@ -63,7 +62,7 @@ twitMentionStream.on("tweet", async (tweet) => {
             }
 
             if(common.isUsableVar(helpMessage_tweetResponse) && common.isUsableVar(commandsMessage_tweetResponse)) {
-                logging.logDebug("Both help tweet data and command list tweet data looks good; delete them after 3 minutes");
+                logging.logDebug("Both help tweet data and command list tweet data looks good; delete them after 1 minutes");
 
                 setTimeout(async () => {
                     try {
@@ -71,10 +70,10 @@ twitMentionStream.on("tweet", async (tweet) => {
                         await destroyTweet(helpMessage_tweetResponse.data.id_str);
                         logging.logDebug("Help tweets destroyed");
                     } catch(error) {
-                        logging.logError("Failed to destroy help tweets");
+                        logging.logError("Failed to destroy help tweets; maybe it's already destroyed?");
                         console.error(error);
                     }
-                }, 180000);
+                }, 60000);
             }
 
             break;
@@ -102,7 +101,7 @@ twitMentionStream.on("tweet", async (tweet) => {
                             await destroyTweet(tweetResponse.data.id_str);         // `tweetResponse.data.id` is wrong data (not accurate)
                             logging.logDebug("Test tweet destroyed");
                         } catch(error) {
-                            logging.logDebug("Failed to destroy test tweet");
+                            logging.logDebug("Failed to destroy test tweet; maybe it's already destroyed?");
                             console.error(error);
                         }
                     }, 10000);

@@ -20,6 +20,9 @@ module.exports = {
             days:           Math.floor(uptime / (60 * 60 * 24))
         };
     },
+    
+    /* Common constants */
+    gitRevision: require("child_process").execSync("git rev-parse --short HEAD", { cwd: __dirname }).toString().trim(),
 
     /* PM10/PM2.5 baselines */
     whoPM10DailyBaseline:  50,     // WHO - PM10 daily(24h) baseline                : 50㎍/㎥
