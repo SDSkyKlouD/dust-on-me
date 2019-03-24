@@ -30,7 +30,7 @@ twitMentionStream.on("tweet", async (tweet) => {
     logging.logDebug(`Text splitted to process command : ${splitted}`);
 
     switch(splitted[0]) {
-        case "테스트":
+        case "테스트": {
             logging.logInfo("The command is to check the bot doing its work well");
 
             if(caller === config.maintainerAccountId) {
@@ -48,7 +48,7 @@ twitMentionStream.on("tweet", async (tweet) => {
                 if(common.isUsableVar(tweetResponse)) {
                     setTimeout(async () => {
                         try {
-                            await destroyTweet(tweetResponse.data.id_str);         // `tweetResponse.data.id` is wrong id
+                            await destroyTweet(tweetResponse.data.id_str);         // `tweetResponse.data.id` is wrong id (not accurate)
                             logging.logDebug("Test tweet destroyed");
                         } catch(error) {
                             logging.logDebug("Failed to destroy test tweet");
@@ -62,16 +62,18 @@ twitMentionStream.on("tweet", async (tweet) => {
                 replyToCallerTweet("알 수 없는 명령어에요! 명령어를 다시 한 번 확인해주세요😅");
             }
             break;
-        default:
+        }
+        default: {
             logging.logDebug("The command is not exist; pass to default behavior");
 
             replyToCallerTweet("죄송해요! 아직 멘션 기능이 완성되지 않았어요😥");
             break;
+        }
     }
 });
 /* === */
 
-cron.schedule("0 3 */1 * * *", async () => {        // Scheduled: Post hourly dust info for each sido on Twitter every hour
+cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly dust info for each sido on Twitter every hour
     let PM25data = await airkorea.call(airkorea.endpoints.lastHourRTPM25InfoBySido[0],
                                        airkorea.endpoints.lastHourRTPM25InfoBySido[1]);
     PM25data = PM25data.list[0];
@@ -82,12 +84,12 @@ cron.schedule("0 3 */1 * * *", async () => {        // Scheduled: Post hourly du
     if(common.isUsableVar(PM25data) && common.isUsableVar(PM10data)
         && PM25data.dataTime === PM10data.dataTime) {
         let lastUpdatedDate = PM25data.dataTime.replace(/-/g, "");
-        let text = `${lastUpdatedDate}\nPM2.5 / PM10 | 단위 ${common.PMDustUnit}\n`;
+        let text = `${lastUpdatedDate} 시도별 평균\n단위 ${common.PMDustUnit}\nPM2.5｜PM10\n`;
 
         Object.keys(common.sidoNamesKor).forEach((item) => {
             if(common.isUsableVar(PM25data[item]) && common.isUsableVar(PM10data[item])
             && PM25data[item] > 0 && PM10data[item] > 0) {
-                text += `\n${common.sidoNamesKor[item][0]} ${PM25data[item]} / ${PM10data[item]}`;
+                text += `\n${common.sidoNamesKor[item][0]} ${PM25data[item]}｜${PM10data[item]}`;
             }
         });
 
