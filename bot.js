@@ -30,6 +30,8 @@ twitMentionStream.on("tweet", async (tweet) => {
     let splitted = normalizeMentionTweetText(tweet.text);
     logging.logDebug(`Text splitted to process command : ${splitted}`);
 
+    if(caller === config.botAccountId) return;
+
     switch(splitted[0].toLowerCase()) {
         case "명령어":
         case "커맨드":

@@ -17,12 +17,15 @@ module.exports = {
     // Airkorea UTF-8 URL encoded API Key (data.go.kr / openapi.airkorea.or.kr)
     airKoreaApiKey: "",
 
-    // Screen name of the bot (without `@`)
-    screenName: "",
-
     // Enable/disable debugging log (value must be `true` or `false`)
     debuggingLog: false,
 
+    // Screen name of the bot (without `@`)
+    screenName: "",
+
+    // Twitter account ID(numeric `long`) of the bot
+    botAccountId: 0,
+    
     // Twitter account ID(numeric `long`) of the bot maintainer
     maintainerAccountId: 0
 };
