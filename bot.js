@@ -50,7 +50,6 @@ twitMentionStream.on("tweet", async (tweet) => {
                                   "💬 도움말 : 간단한 도움말과 명령어 목록을 보여드려요.\n";
             let helpMessage_tweetResponse;
             let commandsMessage_tweetResponse;
-            console.log(helpMessage);
 
             try {
                 helpMessage_tweetResponse = await replyToCallerTweet(helpMessage);
