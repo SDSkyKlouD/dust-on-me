@@ -26,17 +26,64 @@ twitMentionStream.on("tweet", async (tweet) => {
 
     let caller = tweet.user.id;
     let replyToCallerTweet = (text) => postReplyTextTweet(tweet.id, `@${tweet.user.screen_name} ${text}`);
+    let replyToMyTweet     = (tweetObj, text) => postReplyTextTweet(tweetObj.id, text);
     let splitted = normalizeMentionTweetText(tweet.text);
     logging.logDebug(`Text splitted to process command : ${splitted}`);
 
-    switch(splitted[0]) {
+    switch(splitted[0].toLowerCase()) {
+        case "명령어":
+        case "커맨드":
+        case "헬프":
+        case "도움":
+        case "도움말": {
+            logging.logInfo("The command is to give the user some help message");
+
+            let gitRevision = require("child_process").execSync("git rev-parse --short HEAD", { cwd: __dirname }).toString().trim();
+            let helpMessage =     "\n인터렉티브 미세먼지 정보봇, 『더스트.온.미』에요!\n" +
+                                  "현재 개발 단계라 일부 기능/명령어가 없거나 작동하지 않을 수 있어요.\n" +
+                                  `명령어는 【@${config.screenName} [명령어]】 형태로 멘션하시면 돼요.\n\n` +
+                                  "사용 API : 한국환경공단 대기오염정보 OpenAPI\n" +
+                                  ((common.isUsableVar(gitRevision)) ? `개발 리비전 : ${gitRevision}` : "");
+            let commandsMessage = "명령어 목록\n\n" +
+                                  ((caller === config.maintainerAccountId) ? "🔧 테스트 : 봇 관리자용 명령어\n" : "") +
+                                  "💬 도움말 : 간단한 도움말과 명령어 목록을 보여드려요.\n";
+            let helpMessage_tweetResponse;
+            let commandsMessage_tweetResponse;
+            console.log(helpMessage);
+
+            try {
+                helpMessage_tweetResponse = await replyToCallerTweet(helpMessage);
+                commandsMessage_tweetResponse = await replyToMyTweet(helpMessage_tweetResponse, commandsMessage);
+                logging.logDebug("Posted some replies with help messages to caller");
+            } catch(error) {
+                logging.logDebug("Failed to post help tweet in reply to caller");
+                console.error(error);
+            }
+
+            if(common.isUsableVar(helpMessage_tweetResponse) && common.isUsableVar(commandsMessage_tweetResponse)) {
+                logging.logDebug("Both help tweet data and command list tweet data looks good; delete them after 3 minutes");
+
+                setTimeout(async () => {
+                    try {
+                        await destroyTweet(commandsMessage_tweetResponse.data.id_str);
+                        await destroyTweet(helpMessage_tweetResponse.data.id_str);
+                        logging.logDebug("Help tweets destroyed");
+                    } catch(error) {
+                        logging.logError("Failed to destroy help tweets");
+                        console.error(error);
+                    }
+                }, 180000);
+            }
+
+            break;
+        }
         case "테스트": {
             logging.logInfo("The command is to check the bot doing its work well");
 
             if(caller === config.maintainerAccountId) {
                 logging.logDebug("Test caller is the bot maintainer; response to him/her");
 
-                let uptime = common.getUptime();
+                let uptime = common.uptime();
                 let tweetResponse;
                 try {
                     tweetResponse = await replyToCallerTweet(`잘 들려요! 현재 ${uptime.days}일 ${uptime.hours}시 ${uptime.minutes}분 ${uptime.seconds}초동안 가동되고 있어요.`);
@@ -46,6 +93,8 @@ twitMentionStream.on("tweet", async (tweet) => {
                 }
 
                 if(common.isUsableVar(tweetResponse)) {
+                    logging.logDebug("Test tweet data looks good; delete it after 10 seconds");
+
                     setTimeout(async () => {
                         try {
                             await destroyTweet(tweetResponse.data.id_str);         // `tweetResponse.data.id` is wrong data (not accurate)
@@ -61,12 +110,13 @@ twitMentionStream.on("tweet", async (tweet) => {
 
                 replyToCallerTweet("알 수 없는 명령어에요! 명령어를 다시 한 번 확인해주세요😅");
             }
+
             break;
         }
         default: {
             logging.logDebug("The command is not exist; pass to default behavior");
 
-            replyToCallerTweet("죄송해요! 아직 멘션 기능이 완성되지 않았어요😥");
+            replyToCallerTweet("알 수 없는 명령어에요! 명령어를 다시 한 번 확인해주세요😅");
             break;
         }
     }
@@ -97,8 +147,6 @@ cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly d
                 text += `\n${common.sidoNamesKor[item][0]} ${PM25data[item]}｜${PM10data[item]}`;
             }
         });
-
-        logging.logDebug(`Will post this on Twitter: \n${text}`);
 
         try {
             let postedTweet = await postPublicTextTweet(text);

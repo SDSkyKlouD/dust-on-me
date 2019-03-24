@@ -7,7 +7,7 @@ module.exports = {
             throw new TypeError("isUsableVar: passed object is null or undefined");
         }
     },
-    getUptime: () => {
+    uptime: () => {
         let uptime = process.uptime();
 
         return {
