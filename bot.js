@@ -138,7 +138,7 @@ cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly d
         && PM25data.dataTime === PM10data.dataTime) {
         logging.logDebug("Both data looks good and data time is match");
 
-        let lastUpdatedDate = PM25data.dataTime.replace(/-/g, "");
+        let lastUpdatedDate = PM25data.dataTime.replace(/-/g, "").replace(/:00/g, "시");
         let text = `${lastUpdatedDate} 시도별 평균\n단위 ${common.PMDustUnit}\nPM2.5｜PM10\n`;
 
         Object.keys(common.sidoNamesKor).forEach((item) => {
