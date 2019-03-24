@@ -32,7 +32,7 @@ twitMentionStream.on("tweet", async (tweet) => {
     let splitted = normalizeMentionTweetText(tweet.text);
     logging.logDebug(`Text splitted to process command : ${splitted}`);
 
-    switch(splitted[0].toLowerCase()) {
+    switch(splitted[0].toLowerCase()) {     // TODO: merge mergable parts between help command and test command (like `tweet and destroy`...) into a function
         case "명령어":
         case "커맨드":
         case "헬프":
