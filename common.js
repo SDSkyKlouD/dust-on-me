@@ -11,13 +11,11 @@ module.exports = {
         let uptime = process.uptime();
 
         return {
-            seconds:        Math.floor(uptime % 60),
             fullSeconds:    Math.floor(uptime),
-            minutes:        Math.floor(uptime % (24 * 60 * 60) / 60),
-            fullMinutes:    Math.floor(uptime / 60),
-            hours:          Math.floor(uptime % 24 / (60 * 60)),
-            fullHours :     Math.floor(uptime / (60 * 60)),
-            days:           Math.floor(uptime / (60 * 60 * 24))
+            seconds:        Math.floor(uptime % 60),
+            minutes:        Math.floor(uptime % 3600  / 60),
+            hours:          Math.floor(uptime % 86400 / 3600),
+            days:           Math.floor(uptime / 86400)
         };
     },
     
