@@ -22,7 +22,7 @@ const normalizeMentionTweetText = (text) => text.replace(`@${config.screenName} 
 
 /* === Mention Command stream === */
 twitMentionStream.on("tweet", async (tweet) => {
-    let caller = tweet.user.id;
+    let caller = tweet.user.id_str;
     if(caller === config.botAccountId) return;
 
     logging.logInfo("Got mention to this bot");

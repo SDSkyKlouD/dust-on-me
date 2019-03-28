@@ -23,9 +23,9 @@ module.exports = {
     // Screen name of the bot (without `@`)
     screenName: "",
 
-    // Twitter account ID(numeric `long`) of the bot
-    botAccountId: 0,
+    // Twitter account ID(string contains only numeric characters) of the bot
+    botAccountId: "0",
     
-    // Twitter account ID(numeric `long`) of the bot maintainer
-    maintainerAccountId: 0
+    // Twitter account ID(string contains only numeric characters) of the bot maintainer
+    maintainerAccountId: "0"
 };

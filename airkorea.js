@@ -5,6 +5,7 @@ const logging                   = require("./logging.js");
 const axios                     = require("axios");
 const airKoreaKey               = String.raw`${require("./config.js").airkoreaApiKey}`;
 /* === */
+
 /* Useful API call presets */
 const endpoints                 = {
     lastHourRTPM10InfoBySido: [                           // Last hour PM10 dust info
