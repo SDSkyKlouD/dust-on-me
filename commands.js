@@ -2,8 +2,18 @@ const common = require("./common.js");
 const logging = require("./logging.js");
 
 module.exports = (twitModule) => {
-    async function tweetDelete(tweetId) {
-        return await twitModule.post("statuses/destroy/:id", { id: tweetId });
+    async function tweetDestroy(tweetId) {
+        try {
+            return await twitModule.post("statuses/destroy/:id", { id: tweetId });
+        } catch(error) {
+            logging.logError("Can't destroy the tweet. Maybe it's already destroyed?");
+            console.error(error);
+        }
+    }
+
+    async function tweetDelayedDestroy(tweetId, delay) {
+        await new Promise((resolve) => { setTimeout(() => { resolve(); }, delay); });
+        return await tweetDestroy(tweetId);
     }
 
     async function tweet(text) {
@@ -22,20 +32,20 @@ module.exports = (twitModule) => {
 
         if(common.isUsableVar(tweetResponse)) {
             setTimeout(async () => {
-                await tweetDelete(tweetResponse.data.id_str);
+                await tweetDestroy(tweetResponse.data.id_str);
             }, delay);
         }
     }
 
-    async function tweetReply(tweetId, text) {
-        return await twitModule.post("statuses/update", { status: text, in_reply_to_status_id: tweetId });
+    async function tweetReply(tweetId, targetAccountScreenName, text) {
+        return await twitModule.post("statuses/update", { status: `@${targetAccountScreenName} ${text}`, in_reply_to_status_id: tweetId });
     }
     
-    async function tweetReplyAndDestroy(tweetId, text, delay) {
+    async function tweetReplyAndDestroy(tweetId, targetAccountScreenName, text, delay) {
         let tweetResponse;
 
         try {
-            tweetResponse = await tweetReply(tweetId, text);
+            tweetResponse = await tweetReply(tweetId, targetAccountScreenName, text);
         } catch(error) {
             logging.logError("Failed to post reply Tweet");
             console.error(error);
@@ -43,13 +53,14 @@ module.exports = (twitModule) => {
 
         if(common.isUsableVar(tweetResponse)) {
             setTimeout(async () => {
-                await tweetDelete(tweetResponse.data.id_str);
+                await tweetDestroy(tweetResponse.data.id_str);
             }, delay);
         }
     }
 
     return {
-        tweetDelete: tweetDelete,
+        tweetDestroy: tweetDestroy,
+        tweetDelayedDestroy: tweetDelayedDestroy,
         tweet: tweet,
         tweetAndDestroy: tweetAndDestroy,
         tweetReply: tweetReply,

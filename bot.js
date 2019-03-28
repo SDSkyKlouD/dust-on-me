@@ -26,7 +26,10 @@ twitMentionStream.on("tweet", async (tweet) => {
 
     logging.logInfo("Got mention to this bot");
 
+    let callerScreenName = tweet.user.screen_name;
     let originalTweetId = tweet.id_str;
+    let replyToCallerTweet = (text) => commands.tweetReply(originalTweetId, callerScreenName, text);
+    let replyToCallerTweetAndDestroy = (text, delay) => commands.tweetReplyAndDestroy(originalTweetId, callerScreenName, text, delay);
     let splitted = normalizeMentionTweetText(tweet.text);
     logging.logDebug(`Text splitted to process command : ${splitted}`);
 
@@ -38,8 +41,9 @@ twitMentionStream.on("tweet", async (tweet) => {
         case "도움말": {
             logging.logInfo("The command is to give the user some help message");
 
-            let helpMessageTweet = await commands.tweetReplyAndDestroy(originalTweetId, messages.command_HelpMain(config.screenName), 60000);
-            await commands.tweetReplyAndDestroy(helpMessageTweet.data.id_str, messages.command_HelpCommand(caller, config.maintainerAccountId), 60000);
+            let helpMessageTweet = await replyToCallerTweet(messages.command_HelpMain(config.screenName));
+            await commands.tweetReplyAndDestroy(helpMessageTweet.data.id_str, config.screenName, messages.command_HelpCommand(caller, config.maintainerAccountId), 60000);
+            await commands.tweetDelayedDestroy(helpMessageTweet.data.id_str, 60000);
 
             break;
         }
@@ -50,11 +54,11 @@ twitMentionStream.on("tweet", async (tweet) => {
                 logging.logDebug("Test caller is the bot maintainer; response to him/her");
 
                 let uptime = common.uptime();
-                await commands.tweetReplyAndDestroy(originalTweetId, messages.command_Uptime(uptime), 10000);
+                await replyToCallerTweetAndDestroy(messages.command_Uptime(uptime), 10000);
             } else {
                 logging.logDebug("Test caller is NOT the bot maintainer; act like the command is not exist");
 
-                await commands.tweetReplyAndDestroy(originalTweetId, messages.command_NotFound(), 10000);
+                await replyToCallerTweetAndDestroy(messages.command_NotFound(), 10000);
             }
 
             break;
@@ -62,7 +66,7 @@ twitMentionStream.on("tweet", async (tweet) => {
         default: {
             logging.logDebug("The command is not exist; pass to default behavior");
 
-            await commands.tweetReplyAndDestroy(originalTweetId, messages.command_NotFound(), 10000);
+            await replyToCallerTweet(messages.command_NotFound(), 10000);
             break;
         }
     }
