@@ -28,9 +28,9 @@ twitMentionStream.on("tweet", async (tweet) => {
     let replyToCallerTweet = (text) => commands.tweetReply(originalTweetId, callerScreenName, text);
     let replyToCallerTweetAndDestroy = (text, delay) => commands.tweetReplyAndDestroy(originalTweetId, callerScreenName, text, delay);
     let splitted = tweet.text.replace(`@${config.screenName} `, "").split(" ");
-    logging.logDebug(`Text splitted to process command : ${splitted}`);
+    logging.logDebug(`Text splitted to process the command : ${splitted}`);
 
-    switch(splitted[0].toLowerCase()) {     // TODO: merge mergable parts between help command and test command (like `tweet and destroy`...) into a function
+    switch(splitted[0].toLowerCase()) {
         case "명령어":
         case "커맨드":
         case "헬프":
