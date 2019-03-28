@@ -63,7 +63,7 @@ twitMentionStream.on("tweet", async (tweet) => {
         default: {
             logging.logDebug("The command is not exist; pass to default behavior");
 
-            await replyToCallerTweet(messages.command_NotFound(), 10000);
+            await replyToCallerTweetAndDestroy(messages.command_NotFound(), 10000);
             break;
         }
     }
