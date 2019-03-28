@@ -14,9 +14,6 @@ const messages                  = require("./messages.js");
 
 /* `twit` setup */
 const twitMentionStream         = twitter.stream("statuses/filter", { track: [ `@${config.screenName}` ]});
-
-/* Simple functions */
-const normalizeMentionTweetText = (text) => text.replace(`@${config.screenName} `, "").split(" ");
 /* === */
 
 /* === Mention Command stream === */
@@ -30,7 +27,7 @@ twitMentionStream.on("tweet", async (tweet) => {
     let originalTweetId = tweet.id_str;
     let replyToCallerTweet = (text) => commands.tweetReply(originalTweetId, callerScreenName, text);
     let replyToCallerTweetAndDestroy = (text, delay) => commands.tweetReplyAndDestroy(originalTweetId, callerScreenName, text, delay);
-    let splitted = normalizeMentionTweetText(tweet.text);
+    let splitted = tweet.text.replace(`@${config.screenName} `, "").split(" ");
     logging.logDebug(`Text splitted to process command : ${splitted}`);
 
     switch(splitted[0].toLowerCase()) {     // TODO: merge mergable parts between help command and test command (like `tweet and destroy`...) into a function
