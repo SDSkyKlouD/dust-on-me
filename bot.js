@@ -9,14 +9,12 @@ const logging                   = require("./logging.js");
 const airkorea                  = require("./airkorea.js");
 const twitter                   = new (require("twit"))(config.twitterConfigs);
 const cron                      = require("node-cron");
+const commands                  = require("./commands.js")(twitter);
 
 /* `twit` setup */
 const twitMentionStream         = twitter.stream("statuses/filter", { track: [ `@${config.screenName}` ]});
 
 /* Simple functions */
-const postPublicTextTweet       = (text) => twitter.post("statuses/update", { status: text });
-const postReplyTextTweet        = (inReplyToStatusId, text) => twitter.post("statuses/update", { status: text, in_reply_to_status_id: inReplyToStatusId });
-const destroyTweet              = (tweetId) => twitter.post("statuses/destroy/:id", { id: tweetId });
 const normalizeMentionTweetText = (text) => text.replace(`@${config.screenName} `, "").split(" ");
 /* === */
 
@@ -27,10 +25,11 @@ twitMentionStream.on("tweet", async (tweet) => {
 
     logging.logInfo("Got mention to this bot");
 
-    let replyToCallerTweet = (text) => postReplyTextTweet(tweet.id_str, `@${tweet.user.screen_name} ${text}`);
-    let replyToMyTweet     = (tweetObj, text) => postReplyTextTweet(tweetObj.data.id_str, `@${tweet.user.screen_name} ${text}`);
+    let originalTweetId = tweet.id_str;
     let splitted = normalizeMentionTweetText(tweet.text);
     logging.logDebug(`Text splitted to process command : ${splitted}`);
+
+    let commandNotFoundMessage =  "알 수 없는 명령어에요! 명령어를 다시 한 번 확인해주세요😅";
 
     switch(splitted[0].toLowerCase()) {     // TODO: merge mergable parts between help command and test command (like `tweet and destroy`...) into a function
         case "명령어":
@@ -48,32 +47,9 @@ twitMentionStream.on("tweet", async (tweet) => {
             let commandsMessage = "명령어 목록\n\n" +
                                   ((caller === config.maintainerAccountId) ? "🔧 테스트 : 봇 관리자용 명령어\n" : "") +
                                   "💬 도움말 : 간단한 도움말과 명령어 목록을 보여드려요.\n";
-            let helpMessage_tweetResponse;
-            let commandsMessage_tweetResponse;
 
-            try {
-                helpMessage_tweetResponse = await replyToCallerTweet(helpMessage);
-                commandsMessage_tweetResponse = await replyToMyTweet(helpMessage_tweetResponse, commandsMessage);
-                logging.logDebug("Posted some replies with help messages to caller");
-            } catch(error) {
-                logging.logDebug("Failed to post help tweet in reply to caller");
-                console.error(error);
-            }
-
-            if(common.isUsableVar(helpMessage_tweetResponse) && common.isUsableVar(commandsMessage_tweetResponse)) {
-                logging.logDebug("Both help tweet data and command list tweet data looks good; delete them after 1 minutes");
-
-                setTimeout(async () => {
-                    try {
-                        await destroyTweet(commandsMessage_tweetResponse.data.id_str);
-                        await destroyTweet(helpMessage_tweetResponse.data.id_str);
-                        logging.logDebug("Help tweets destroyed");
-                    } catch(error) {
-                        logging.logError("Failed to destroy help tweets; maybe it's already destroyed?");
-                        console.error(error);
-                    }
-                }, 60000);
-            }
+            let helpMessageTweet = await commands.tweetReplyAndDestroy(originalTweetId, helpMessage, 60000);
+            await commands.tweetReplyAndDestroy(helpMessageTweet.data.id_str, commandsMessage, 60000);
 
             break;
         }
@@ -84,31 +60,11 @@ twitMentionStream.on("tweet", async (tweet) => {
                 logging.logDebug("Test caller is the bot maintainer; response to him/her");
 
                 let uptime = common.uptime();
-                let tweetResponse;
-                try {
-                    tweetResponse = await replyToCallerTweet(`잘 들려요! 현재 ${uptime.days}일 ${uptime.hours}시 ${uptime.minutes}분 ${uptime.seconds}초동안 가동되고 있어요.`);
-                } catch(error) {
-                    logging.logDebug("Failed to post test tweet");
-                    console.error(error);
-                }
-
-                if(common.isUsableVar(tweetResponse)) {
-                    logging.logDebug("Test tweet data looks good; delete it after 10 seconds");
-
-                    setTimeout(async () => {
-                        try {
-                            await destroyTweet(tweetResponse.data.id_str);         // `tweetResponse.data.id` is wrong data (not accurate)
-                            logging.logDebug("Test tweet destroyed");
-                        } catch(error) {
-                            logging.logDebug("Failed to destroy test tweet; maybe it's already destroyed?");
-                            console.error(error);
-                        }
-                    }, 10000);
-                }
+                await commands.tweetReplyAndDestroy(originalTweetId, `잘 들려요! 현재 ${uptime.days}일 ${uptime.hours}시 ${uptime.minutes}분 ${uptime.seconds}초동안 가동되고 있어요.`, 10000);
             } else {
                 logging.logDebug("Test caller is NOT the bot maintainer; act like the command is not exist");
 
-                replyToCallerTweet("알 수 없는 명령어에요! 명령어를 다시 한 번 확인해주세요😅");
+                await commands.tweetReplyAndDestroy(originalTweetId, commandNotFoundMessage, 10000);
             }
 
             break;
@@ -116,7 +72,7 @@ twitMentionStream.on("tweet", async (tweet) => {
         default: {
             logging.logDebug("The command is not exist; pass to default behavior");
 
-            replyToCallerTweet("알 수 없는 명령어에요! 명령어를 다시 한 번 확인해주세요😅");
+            await commands.tweetReplyAndDestroy(originalTweetId, commandNotFoundMessage, 10000);
             break;
         }
     }
@@ -149,7 +105,7 @@ cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly d
         });
 
         try {
-            let postedTweet = await postPublicTextTweet(text);
+            let postedTweet = await commands.tweet(text);
             
             if(common.isUsableVar(postedTweet)) {
                 logging.logInfo("Posted on Twitter; scheduled job done");
