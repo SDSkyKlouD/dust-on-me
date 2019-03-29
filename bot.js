@@ -20,6 +20,9 @@ const twitMentionStream         = twitter.stream("statuses/filter", { track: [ `
 twitMentionStream.on("tweet", async (tweet) => {
     let caller = tweet.user.id_str;
     if(caller === config.botAccountId) return;
+  
+  	let tweetText = tweet.text;
+  	if(!tweetText.startsWith(`@${config.screenName} `)) return;
 
     logging.logInfo("Got mention to this bot");
 
@@ -27,7 +30,7 @@ twitMentionStream.on("tweet", async (tweet) => {
     let originalTweetId = tweet.id_str;
     let replyToCallerTweet = (text) => commands.tweetReply(originalTweetId, callerScreenName, text);
     let replyToCallerTweetAndDestroy = (text, delay) => commands.tweetReplyAndDestroy(originalTweetId, callerScreenName, text, delay);
-    let splitted = tweet.text.replace(`@${config.screenName} `, "").split(" ");
+    let splitted = tweetText.replace(`@${config.screenName} `, "").split(" ");
     logging.logDebug(`Text splitted to process the command : ${splitted}`);
 
     switch(splitted[0].toLowerCase()) {
