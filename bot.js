@@ -21,8 +21,8 @@ twitMentionStream.on("tweet", async (tweet) => {
     let caller = tweet.user.id_str;
     if(caller === config.botAccountId) return;
   
-  	let tweetText = tweet.text;
-  	if(!tweetText.startsWith(`@${config.screenName} `)) return;
+    let tweetText = tweet.text;
+    if(!tweetText.startsWith(`@${config.screenName} `)) return;
 
     logging.logInfo("Got mention to this bot");
 
