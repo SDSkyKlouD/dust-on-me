@@ -40,6 +40,7 @@ twitMentionStream.on("tweet", async (tweet) => {
     logging.logDebug(`Text splitted to process the command : ${splitted}`);
 
     switch(splitted[0].toLowerCase()) {
+        case "🕛":
         case "시도평균":
         case "시도실시간평균":
         case "실시간평균":
@@ -109,6 +110,7 @@ twitMentionStream.on("tweet", async (tweet) => {
 
             break;
         }
+        case "💬":
         case "명령어":
         case "커맨드":
         case "헬프":
@@ -122,6 +124,7 @@ twitMentionStream.on("tweet", async (tweet) => {
 
             break;
         }
+        case "🔧":
         case "테스트": {
             logging.logInfo("The command is to check the bot doing its work well");
 
