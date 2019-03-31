@@ -8,6 +8,7 @@ const airKoreaKey               = String.raw`${require("./config.js").airkoreaAp
 
 /* Useful API call presets */
 const endpoints                 = {
+    /* Averages of all sido */
     lastHourRTPM10InfoBySido: [                           // Last hour PM10 dust info
         "ArpltnInforInqireSvc/getCtprvnMesureLIst",
         {
@@ -45,7 +46,10 @@ const endpoints                 = {
             "dataGubun": "DAILY",
             "searchCondition": "WEEK"
         }
-    ]
+    ],
+
+    /* Average of specific sido */
+    
 };
 /* === */
 
