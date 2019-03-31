@@ -40,6 +40,9 @@ twitMentionStream.on("tweet", async (tweet) => {
     logging.logDebug(`Text splitted to process the command : ${splitted}`);
 
     switch(splitted[0].toLowerCase()) {
+        case "시도평균":
+        case "시도실시간평균":
+        case "실시간평균":
         case "평균": {
             logging.logInfo("The command is to give the user hourly average dust level of requested sido");
 
