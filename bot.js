@@ -16,6 +16,11 @@ const messages                  = require("./messages.js");
 const twitMentionStream         = twit.stream("statuses/filter", { track: [ `@${config.screenName}` ]});
 /* === */
 
+/* === Shared Variables === */
+let pm25AverageData_SidoCurrentHour;
+let pm10AverageData_SidoCurrentHour;
+/* === */
+
 /* === Mention Command stream === */
 twitMentionStream.on("tweet", async (tweet) => {
     let caller = tweet.user.id_str;
@@ -54,7 +59,7 @@ twitMentionStream.on("tweet", async (tweet) => {
                 if(found && sidoName !== "") {
                     logging.logDebug("Sido name found; getting API data");
 
-                    
+
                 } else {
                     logging.logDebug("No sido name found; notice to user");
 
@@ -111,24 +116,24 @@ twitMentionStream.on("tweet", async (tweet) => {
 cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly dust info for each sido on Twitter every hour
     logging.logInfo("Scheduled job: post hourly PM2.5/PM1.0 information for each sido on Twitter every hour half");
 
-    let PM25data = await airkorea.call(airkorea.endpoints.lastHourRTPM25InfoBySido[0],
-                                       airkorea.endpoints.lastHourRTPM25InfoBySido[1]);
-    PM25data = PM25data.list[0];
-    let PM10data = await airkorea.call(airkorea.endpoints.lastHourRTPM10InfoBySido[0],
-                                       airkorea.endpoints.lastHourRTPM10InfoBySido[1]);
-    PM10data = PM10data.list[0];
+    pm25AverageData_SidoCurrentHour = await airkorea.call(airkorea.endpoints.lastHourRTPM25InfoBySido[0],
+                                              airkorea.endpoints.lastHourRTPM25InfoBySido[1]);
+    pm25AverageData_SidoCurrentHour = pm25AverageData_SidoCurrentHour.list[0];
+    pm10AverageData_SidoCurrentHour = await airkorea.call(airkorea.endpoints.lastHourRTPM10InfoBySido[0],
+                                              airkorea.endpoints.lastHourRTPM10InfoBySido[1]);
+    pm10AverageData_SidoCurrentHour = pm10AverageData_SidoCurrentHour.list[0];
 
-    if(common.isUsableVar(PM25data) && common.isUsableVar(PM10data)
-        && PM25data.dataTime === PM10data.dataTime) {
+    if(common.isUsableVar(pm25AverageData_SidoCurrentHour) && common.isUsableVar(pm10AverageData_SidoCurrentHour)
+        && pm25AverageData_SidoCurrentHour.dataTime === pm10AverageData_SidoCurrentHour.dataTime) {
         logging.logDebug("Both data looks good and data time is match");
 
-        let lastUpdatedDate = PM25data.dataTime.replace(/-/g, "").replace(/:00/g, "시");
+        let lastUpdatedDate = pm25AverageData_SidoCurrentHour.dataTime.replace(/-/g, "").replace(/:00/g, "시");
         let text = `${lastUpdatedDate} 시도별 평균\n단위 ${common.PMDustUnit}\nPM2.5｜PM10\n`;
 
         Object.keys(common.sidoNamesKor).forEach((item) => {
-            if(common.isUsableVar(PM25data[item]) && common.isUsableVar(PM10data[item])
-            && PM25data[item] > 0 && PM10data[item] > 0) {
-                text += `\n${common.sidoNamesKor[item][0]} ${PM25data[item]}｜${PM10data[item]}`;
+            if(common.isUsableVar(pm25AverageData_SidoCurrentHour[item]) && common.isUsableVar(pm10AverageData_SidoCurrentHour[item])
+            && pm25AverageData_SidoCurrentHour[item] > 0 && pm10AverageData_SidoCurrentHour[item] > 0) {
+                text += `\n${common.sidoNamesKor[item][0]} ${pm25AverageData_SidoCurrentHour[item]}｜${pm10AverageData_SidoCurrentHour[item]}`;
             }
         });
 
