@@ -13,5 +13,9 @@ module.exports = {
                                                             ((callerId === maintainerAccountId) ? "🔧 테스트 : 봇 관리자용 명령어\n" : "") +
                                                             "💬 도움말 : 간단한 도움말과 명령어 목록을 보여드려요.\n",
                                                             
-    command_Uptime: (uptime) => `잘 들려요! 현재 ${uptime.days}일 ${uptime.hours}시 ${uptime.minutes}분 ${uptime.seconds}초동안 가동되고 있어요.`
+    command_Uptime: (uptime) => `잘 들려요! 현재 ${uptime.days}일 ${uptime.hours}시 ${uptime.minutes}분 ${uptime.seconds}초동안 가동되고 있어요.`,
+
+    command_ParametersTooManyOrLess: () => "입력이 너무 적거나 많아요😰 도움말을 참고해주세요!",
+
+    command_NoSidoNameFound: () => "입력하신 시도명을 이해할 수 없어요😱 시도명을 확인해 주세요!"
 }

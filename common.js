@@ -21,6 +21,8 @@ module.exports = {
     
     /* Common constants */
     gitRevision: require("child_process").execSync("git rev-parse --short HEAD", { cwd: __dirname }).toString().trim(),
+    noticeDelayShort: 10000,       // Short delay before delete Tweet
+    noticeDelayLong: 60000,        // Long delay before delete Tweet
 
     /* PM10/PM2.5 baselines */
     whoPM10DailyBaseline:  50,     // WHO - PM10 daily(24h) baseline                : 50㎍/㎥

@@ -34,6 +34,40 @@ twitMentionStream.on("tweet", async (tweet) => {
     logging.logDebug(`Text splitted to process the command : ${splitted}`);
 
     switch(splitted[0].toLowerCase()) {
+        case "평균": {
+            logging.logInfo("The command is to give the user hourly average dust level of requested sido");
+
+            if(splitted.length === 2) {
+                logging.logDebug("Command length is 2, continuing process the command");
+
+                let found = false;
+                let sidoName = "";
+                Object.keys(common.sidoNamesKor).forEach((key) => {
+                    for(let item in common.sidoNamesKor[key]) {
+                        if(item === splitted[1]) {
+                            found = true;
+                            sidoName = common.sidoNamesKor[key][0];
+                        }
+                    }
+                });
+
+                if(found && sidoName !== "") {
+                    logging.logDebug("Sido name found; getting API data");
+
+                    
+                } else {
+                    logging.logDebug("No sido name found; notice to user");
+
+                    await replyToCallerTweetAndDestroy(messages.command_NoSidoNameFound(), common.noticeDelayShort);
+                }
+            } else {
+                logging.logDebug("Command length is not 2, request for more parameters");
+
+                await replyToCallerTweetAndDestroy(messages.command_ParametersTooManyOrLess(), common.noticeDelayShort);
+            }
+
+            break;
+        }
         case "명령어":
         case "커맨드":
         case "헬프":
@@ -42,8 +76,8 @@ twitMentionStream.on("tweet", async (tweet) => {
             logging.logInfo("The command is to give the user some help message");
 
             let helpMessageTweet = await replyToCallerTweet(messages.command_HelpMain(config.screenName));
-            twitHelper.tweetReplyAndDestroy(helpMessageTweet.data.id_str, config.screenName, messages.command_HelpCommand(caller, config.maintainerAccountId), 60000);
-            await twitHelper.tweetDestroyDelayed(helpMessageTweet.data.id_str, 60000);
+            twitHelper.tweetReplyAndDestroy(helpMessageTweet.data.id_str, config.screenName, messages.command_HelpCommand(caller, config.maintainerAccountId), common.noticeDelayLong);
+            await twitHelper.tweetDestroyDelayed(helpMessageTweet.data.id_str, common.noticeDelayLong);
 
             break;
         }
@@ -54,11 +88,11 @@ twitMentionStream.on("tweet", async (tweet) => {
                 logging.logDebug("Test caller is the bot maintainer; response to him/her");
 
                 let uptime = common.uptime();
-                await replyToCallerTweetAndDestroy(messages.command_Uptime(uptime), 10000);
+                await replyToCallerTweetAndDestroy(messages.command_Uptime(uptime), common.noticeDelayShort);
             } else {
                 logging.logDebug("Test caller is NOT the bot maintainer; act like the command is not exist");
 
-                await replyToCallerTweetAndDestroy(messages.command_NotFound(), 10000);
+                await replyToCallerTweetAndDestroy(messages.command_NotFound(), common.noticeDelayShort);
             }
 
             break;
@@ -66,7 +100,7 @@ twitMentionStream.on("tweet", async (tweet) => {
         default: {
             logging.logDebug("The command is not exist; pass to default behavior");
 
-            await replyToCallerTweetAndDestroy(messages.command_NotFound(), 10000);
+            await replyToCallerTweetAndDestroy(messages.command_NotFound(), common.noticeDelayShort);
             break;
         }
     }

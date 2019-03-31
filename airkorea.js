@@ -46,10 +46,7 @@ const endpoints                 = {
             "dataGubun": "DAILY",
             "searchCondition": "WEEK"
         }
-    ],
-
-    /* Average of specific sido */
-    
+    ]
 };
 /* === */
 
