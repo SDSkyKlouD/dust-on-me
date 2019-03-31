@@ -11,7 +11,8 @@ module.exports = {
 
     command_HelpCommand: (callerId, maintainerAccountId) => "명령어 목록\n\n" +
                                                             ((callerId === maintainerAccountId) ? "🔧 테스트 : 봇 관리자용 명령어\n" : "") +
-                                                            "💬 도움말 : 간단한 도움말과 명령어 목록을 보여드려요.\n",
+                                                            "💬 도움말 : 간단한 도움말과 명령어 목록을 보여드려요.\n" +
+                                                            "🕛 평균 [시도 이름] : 입력한 시 혹은 도의 현 시간 평균 미세먼지 정보를 알려드려요.\n",
                                                             
     command_Uptime: (uptime) => `잘 들려요! 현재 ${uptime.days}일 ${uptime.hours}시 ${uptime.minutes}분 ${uptime.seconds}초동안 가동되고 있어요.`,
 
@@ -23,7 +24,7 @@ module.exports = {
 
     command_NonUsableTargetAPIData: () => "API 데이터에 오류가 생긴 것 같아요😡 개발자에게 알려주시기 바라요!",
 
-    command_SpecificSidoHourlyAverage: (sidoName, updatedDateTime, pm10, pm25) => `\n${sidoName}의 시간별 평균 미세먼지 수치에요.\n` +
+    command_SpecificSidoHourlyAverage: (sidoName, updatedDateTime, pm10, pm25) => `\n${sidoName}의 현 시간 평균 미세먼지 수치에요.\n` +
                                                                                   `업데이트 일시 : ${updatedDateTime}\n\n` +
                                                                                   `PM10 (미세먼지) : ${pm10}${common.pmDustUnit}\n` +
                                                                                   `PM2.5 (초미세먼지) : ${pm25}${common.pmDustUnit}`,
