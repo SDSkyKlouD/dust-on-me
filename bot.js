@@ -19,6 +19,7 @@ const twitMentionStream         = twit.stream("statuses/filter", { track: [ `@${
 /* === Shared Variables === */
 let pm25AverageData_SidoCurrentHour;
 let pm10AverageData_SidoCurrentHour;
+let pmAverageData_SidoCurrentHour_UpdatedDateTimeStringified;
 /* === */
 
 /* === Mention Command stream === */
@@ -45,22 +46,52 @@ twitMentionStream.on("tweet", async (tweet) => {
             if(splitted.length === 2) {
                 logging.logDebug("Command length is 2, continuing process the command");
 
+                if(!common.isUsableVar(splitted[1])) {
+                    logging.logDebug("Sido parameter is not usable; notice to user");
+
+                    await replyToCallerTweetAndDestroy(messages.command_ParametersUnknownError(), common.noticeDelayShort);
+                    break;
+                }
+
                 let found = false;
+                let sidoKey = "";
                 let sidoName = "";
                 Object.keys(common.sidoNamesKor).forEach((key) => {
-                    for(let item in common.sidoNamesKor[key]) {
-                        if(item === splitted[1]) {
+                    for(let index in common.sidoNamesKor[key]) {
+                        if(common.sidoNamesKor[key][index] === splitted[1]) {
                             found = true;
-                            sidoName = key;
+                            sidoKey = key;
+                            sidoName = common.sidoNamesKor[key][0];
                         }
                     }
                 });
 
-                if(found && sidoName !== "") {
-                    logging.logDebug("Sido name found; getting API data");
+                if(found && sidoKey !== "" && sidoName !== "") {
+                    logging.logDebug("Sido name found; continuing");
+
+                    if(!(common.isUsableVar(pm25AverageData_SidoCurrentHour) || common.isUsableVar(pm10AverageData_SidoCurrentHour))) {
+                        logging.logDebug("No/Partial data available; try to update");
+
+                        try {
+                            await updateCurrentHourDustDataBySido();
+                            logging.logDebug("Update completed");
+                        } catch(error) {
+                            logging.logError("Failed to update current hour dust data by sido");
+                            console.error(error);
+                        }
+                    }
 
                     if(common.isUsableVar(pm25AverageData_SidoCurrentHour) && common.isUsableVar(pm10AverageData_SidoCurrentHour)) {
+                        logging.logDebug("Hourly average data looks good; return to user");
 
+                        await replyToCallerTweetAndDestroy(messages.command_SpecificSidoHourlyAverage(sidoName,
+                                                                                                      pmAverageData_SidoCurrentHour_UpdatedDateTimeStringified,
+                                                                                                      pm10AverageData_SidoCurrentHour[sidoKey],
+                                                                                                      pm25AverageData_SidoCurrentHour[sidoKey]), common.noticeDelayLong);
+                    } else {
+                        logging.logDebug("Still have invalid data; notice to user");
+
+                        await replyToCallerTweetAndDestroy(messages.command_NonUsableTargetAPIData(), common.noticeDelayShort);
                     }
                 } else {
                     logging.logDebug("No sido name found; notice to user");
@@ -132,8 +163,7 @@ cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly d
         && pm25AverageData_SidoCurrentHour.dataTime === pm10AverageData_SidoCurrentHour.dataTime) {
         logging.logDebug("Both data looks good and data time is match");
 
-        let lastUpdatedDate = pm25AverageData_SidoCurrentHour.dataTime.replace(/-/g, "").replace(/:00/g, "시");
-        let text = `${lastUpdatedDate} 시도별 평균\n단위 ${common.PMDustUnit}\nPM2.5｜PM10\n`;
+        let text = `${pmAverageData_SidoCurrentHour_UpdatedDateTimeStringified} 시도별 평균\n단위 ${common.pmDustUnit}\nPM2.5｜PM10\n`;
 
         Object.keys(common.sidoNamesKor).forEach((item) => {
             if(common.isUsableVar(pm25AverageData_SidoCurrentHour[item]) && common.isUsableVar(pm10AverageData_SidoCurrentHour[item])
@@ -166,5 +196,7 @@ async function updateCurrentHourDustDataBySido() {
     pm10AverageData_SidoCurrentHour = await airkorea.call(airkorea.endpoints.lastHourRTPM10InfoBySido[0],
                                               airkorea.endpoints.lastHourRTPM10InfoBySido[1]);
     pm10AverageData_SidoCurrentHour = pm10AverageData_SidoCurrentHour.list[0];
+
+    pmAverageData_SidoCurrentHour_UpdatedDateTimeStringified = pm25AverageData_SidoCurrentHour.dataTime.replace(/(\d+)-(\d+)-(\d+) (\d+):(\d+)/g, "$1/$2/$3 $4시");
 }
 /* === */

@@ -17,5 +17,14 @@ module.exports = {
 
     command_ParametersTooManyOrLess: () => "입력이 너무 적거나 많아요😰 도움말을 참고해주세요!",
 
-    command_NoSidoNameFound: () => "입력하신 시도명을 이해할 수 없어요😱 시도명을 확인해 주세요!"
+    command_ParametersUnknownError: () => "알 수 없는 파라미터 오류! 개발자에게 알려주시기 바라요🤒",
+
+    command_NoSidoNameFound: () => "입력하신 시도명을 이해할 수 없어요😱 시도명을 확인해 주세요!",
+
+    command_NonUsableTargetAPIData: () => "API 데이터에 오류가 생긴 것 같아요😡 개발자에게 알려주시기 바라요!",
+
+    command_SpecificSidoHourlyAverage: (sidoName, updatedDateTime, pm10, pm25) => `\n${sidoName}의 시간별 평균 미세먼지 수치에요.\n` +
+                                                                                  `업데이트 일시 : ${updatedDateTime}\n\n` +
+                                                                                  `PM10 (미세먼지) : ${pm10}${common.pmDustUnit}\n` +
+                                                                                  `PM2.5 (초미세먼지) : ${pm25}${common.pmDustUnit}`,
 }

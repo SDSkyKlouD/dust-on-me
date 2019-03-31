@@ -4,7 +4,7 @@ module.exports = {
         if(typeof(obj) !== "undefined" && obj !== null) {
             return true;
         } else {
-            throw new TypeError("isUsableVar: passed object is null or undefined");
+            return false;
         }
     },
     uptime: () => {
@@ -34,7 +34,7 @@ module.exports = {
     // Korea Ministry of Environment baseline enforced from 2018. 03. 27. / same baseline with USA, Japan, etc.
 
     /* Units */
-    PMDustUnit : "㎍/㎥",
+    pmDustUnit : "㎍/㎥",
 
     /* Sido names */
     // Value: [_short name_, _official full name_, _keywords for mention command_...]
