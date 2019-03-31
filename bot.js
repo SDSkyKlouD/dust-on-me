@@ -59,7 +59,9 @@ twitMentionStream.on("tweet", async (tweet) => {
                 if(found && sidoName !== "") {
                     logging.logDebug("Sido name found; getting API data");
 
-                    
+                    if(common.isUsableVar(pm25AverageData_SidoCurrentHour) && common.isUsableVar(pm10AverageData_SidoCurrentHour)) {
+
+                    }
                 } else {
                     logging.logDebug("No sido name found; notice to user");
 
@@ -116,12 +118,15 @@ twitMentionStream.on("tweet", async (tweet) => {
 cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly dust info for each sido on Twitter every hour
     logging.logInfo("Scheduled job: post hourly PM2.5/PM1.0 information for each sido on Twitter every hour half");
 
-    pm25AverageData_SidoCurrentHour = await airkorea.call(airkorea.endpoints.lastHourRTPM25InfoBySido[0],
-                                              airkorea.endpoints.lastHourRTPM25InfoBySido[1]);
-    pm25AverageData_SidoCurrentHour = pm25AverageData_SidoCurrentHour.list[0];
-    pm10AverageData_SidoCurrentHour = await airkorea.call(airkorea.endpoints.lastHourRTPM10InfoBySido[0],
-                                              airkorea.endpoints.lastHourRTPM10InfoBySido[1]);
-    pm10AverageData_SidoCurrentHour = pm10AverageData_SidoCurrentHour.list[0];
+    logging.logDebug("Updating current hour dust data by sido");
+    try {
+        await updateCurrentHourDustDataBySido();
+        logging.logDebug("Update completed");
+    } catch(error) {
+        logging.logError("Failed to update current hour dust data");
+        console.error(error);
+        return;
+    }
 
     if(common.isUsableVar(pm25AverageData_SidoCurrentHour) && common.isUsableVar(pm10AverageData_SidoCurrentHour)
         && pm25AverageData_SidoCurrentHour.dataTime === pm10AverageData_SidoCurrentHour.dataTime) {
@@ -151,4 +156,15 @@ cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly d
         }
     }
 });
+/* === */
+
+/* === Functions === */
+async function updateCurrentHourDustDataBySido() {
+    pm25AverageData_SidoCurrentHour = await airkorea.call(airkorea.endpoints.lastHourRTPM25InfoBySido[0],
+                                              airkorea.endpoints.lastHourRTPM25InfoBySido[1]);
+    pm25AverageData_SidoCurrentHour = pm25AverageData_SidoCurrentHour.list[0];
+    pm10AverageData_SidoCurrentHour = await airkorea.call(airkorea.endpoints.lastHourRTPM10InfoBySido[0],
+                                              airkorea.endpoints.lastHourRTPM10InfoBySido[1]);
+    pm10AverageData_SidoCurrentHour = pm10AverageData_SidoCurrentHour.list[0];
+}
 /* === */
