@@ -39,7 +39,7 @@ twitMentionStream.on("tweet", async (tweet) => {
             logging.logInfo("The command is to give the user some help message");
 
             let helpMessageTweet = await replyToCallerTweet(messages.command_HelpMain(config.screenName));
-            await twitHelper.tweetReplyAndDestroy(helpMessageTweet.data.id_str, config.screenName, messages.command_HelpCommand(caller, config.maintainerAccountId), 60000);
+            twitHelper.tweetReplyAndDestroy(helpMessageTweet.data.id_str, config.screenName, messages.command_HelpCommand(caller, config.maintainerAccountId), 60000);
             await twitHelper.tweetDestroyDelayed(helpMessageTweet.data.id_str, 60000);
 
             break;
