@@ -51,7 +51,7 @@ twitMentionStream.on("tweet", async (tweet) => {
                     for(let item in common.sidoNamesKor[key]) {
                         if(item === splitted[1]) {
                             found = true;
-                            sidoName = common.sidoNamesKor[key][0];
+                            sidoName = key;
                         }
                     }
                 });
@@ -59,7 +59,7 @@ twitMentionStream.on("tweet", async (tweet) => {
                 if(found && sidoName !== "") {
                     logging.logDebug("Sido name found; getting API data");
 
-
+                    
                 } else {
                     logging.logDebug("No sido name found; notice to user");
 
