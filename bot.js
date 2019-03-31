@@ -61,7 +61,7 @@ twitMentionStream.on("tweet", async (tweet) => {
                         if(common.sidoNamesKor[key][index] === splitted[1]) {
                             found = true;
                             sidoKey = key;
-                            sidoName = common.sidoNamesKor[key][0];
+                            sidoName = common.sidoNamesKor[key][1];
                         }
                     }
                 });
