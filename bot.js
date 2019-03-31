@@ -20,6 +20,9 @@ const twitMentionStream         = twit.stream("statuses/filter", { track: [ `@${
 twitMentionStream.on("tweet", async (tweet) => {
     let caller = tweet.user.id_str;
     if(caller === config.botAccountId) return;
+  
+    let tweetText = tweet.text;
+    if(!tweetText.startsWith(`@${config.screenName} `)) return;
 
     logging.logInfo("Got mention to this bot");
 
@@ -63,7 +66,7 @@ twitMentionStream.on("tweet", async (tweet) => {
         default: {
             logging.logDebug("The command is not exist; pass to default behavior");
 
-            await replyToCallerTweet(messages.command_NotFound(), 10000);
+            await replyToCallerTweetAndDestroy(messages.command_NotFound(), 10000);
             break;
         }
     }
