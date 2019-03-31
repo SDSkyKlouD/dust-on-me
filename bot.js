@@ -7,13 +7,13 @@ try { config = require("./config.js"); } catch(error) { throw "Config file is no
 const common                    = require("./common.js");
 const logging                   = require("./logging.js");
 const airkorea                  = require("./airkorea.js");
-const twitter                   = new (require("twit"))(config.twitterConfigs);
+const twit                      = new (require("twit"))(config.twitterConfigs);
 const cron                      = require("node-cron");
-const commands                  = require("./commands.js")(twitter);
+const twitHelper                = require("./twit.helper.js")(twit);
 const messages                  = require("./messages.js");
 
 /* `twit` setup */
-const twitMentionStream         = twitter.stream("statuses/filter", { track: [ `@${config.screenName}` ]});
+const twitMentionStream         = twit.stream("statuses/filter", { track: [ `@${config.screenName}` ]});
 /* === */
 
 /* === Mention Command stream === */
@@ -25,8 +25,8 @@ twitMentionStream.on("tweet", async (tweet) => {
 
     let callerScreenName = tweet.user.screen_name;
     let originalTweetId = tweet.id_str;
-    let replyToCallerTweet = (text) => commands.tweetReply(originalTweetId, callerScreenName, text);
-    let replyToCallerTweetAndDestroy = (text, delay) => commands.tweetReplyAndDestroy(originalTweetId, callerScreenName, text, delay);
+    let replyToCallerTweet = (text) => twitHelper.tweetReply(originalTweetId, callerScreenName, text);
+    let replyToCallerTweetAndDestroy = (text, delay) => twitHelper.tweetReplyAndDestroy(originalTweetId, callerScreenName, text, delay);
     let splitted = tweet.text.replace(`@${config.screenName} `, "").split(" ");
     logging.logDebug(`Text splitted to process the command : ${splitted}`);
 
@@ -39,8 +39,8 @@ twitMentionStream.on("tweet", async (tweet) => {
             logging.logInfo("The command is to give the user some help message");
 
             let helpMessageTweet = await replyToCallerTweet(messages.command_HelpMain(config.screenName));
-            await commands.tweetReplyAndDestroy(helpMessageTweet.data.id_str, config.screenName, messages.command_HelpCommand(caller, config.maintainerAccountId), 60000);
-            await commands.tweetDelayedDestroy(helpMessageTweet.data.id_str, 60000);
+            await twitHelper.tweetReplyAndDestroy(helpMessageTweet.data.id_str, config.screenName, messages.command_HelpCommand(caller, config.maintainerAccountId), 60000);
+            await twitHelper.tweetDestroyDelayed(helpMessageTweet.data.id_str, 60000);
 
             break;
         }
@@ -96,7 +96,7 @@ cron.schedule("0 30 */1 * * *", async () => {        // Scheduled: Post hourly d
         });
 
         try {
-            let postedTweet = await commands.tweet(text);
+            let postedTweet = await twitHelper.tweet(text);
             
             if(common.isUsableVar(postedTweet)) {
                 logging.logInfo("Posted on Twitter; scheduled job done");

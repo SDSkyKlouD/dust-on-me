@@ -1,6 +1,8 @@
 const common = require("./common.js");
 const logging = require("./logging.js");
 
+const wait = (delayMilliseconds) => new Promise((resolve) => { setTimeout(() => { resolve(); }, delayMilliseconds); });
+
 module.exports = (twitModule) => {
     async function tweetDestroy(tweetId) {
         try {
@@ -11,13 +13,18 @@ module.exports = (twitModule) => {
         }
     }
 
-    async function tweetDelayedDestroy(tweetId, delay) {
-        await new Promise((resolve) => { setTimeout(() => { resolve(); }, delay); });
+    async function tweetDestroyDelayed(tweetId, delayMilliseconds) {
+        await wait(delayMilliseconds);
         return await tweetDestroy(tweetId);
     }
 
     async function tweet(text) {
         return await twitModule.post("statuses/update", { status: text });
+    }
+
+    async function tweetDelayed(text, delayMilliseconds) {
+        await wait(delayMilliseconds);
+        return await tweet(text);
     }
 
     async function tweetAndDestroy(text, delay) {
@@ -31,9 +38,8 @@ module.exports = (twitModule) => {
         }
 
         if(common.isUsableVar(tweetResponse)) {
-            setTimeout(async () => {
-                await tweetDestroy(tweetResponse.data.id_str);
-            }, delay);
+            await wait(delay);
+            return await tweetDestroy(tweetResponse.data.id_str);
         }
     }
 
@@ -52,16 +58,16 @@ module.exports = (twitModule) => {
         }
 
         if(common.isUsableVar(tweetResponse)) {
-            setTimeout(async () => {
-                await tweetDestroy(tweetResponse.data.id_str);
-            }, delay);
+            await wait(delay);
+            return await tweetDestroy(tweetResponse.data.id_str);
         }
     }
 
     return {
         tweetDestroy: tweetDestroy,
-        tweetDelayedDestroy: tweetDelayedDestroy,
+        tweetDestroyDelayed: tweetDestroyDelayed,
         tweet: tweet,
+        tweetDelayed: tweetDelayed,
         tweetAndDestroy: tweetAndDestroy,
         tweetReply: tweetReply,
         tweetReplyAndDestroy: tweetReplyAndDestroy
